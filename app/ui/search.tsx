@@ -1,23 +1,27 @@
 'use client';
 
+import { useDebouncedCallback } from 'use-debounce';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
 export default function Search({ placeholder }: { placeholder: string }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+  const searchParams = useSearchParams(); // reads current URL search parameters
+  const pathname = usePathname(); // gets current path
+  const { replace } = useRouter(); // programatically changes URL
 
-  function handleSearch(term: string) {
-    const params = new URLSearchParams(searchParams);
+  const handleSearch = useDebouncedCallback((term) => { // term is from the input field
+    console.log(`Searching... ${term}`);
+
+    const params = new URLSearchParams(searchParams); // mutable copy of the current query parameters.
+    params.set('page', '1')
     if (term) {
-      params.set('query', term);
+      params.set('query', term); // ?query=whatever+is+typed+here (non-string)
     } else {
       params.delete('query');
     }
     console.log("params.toString(): ", params.toString())
-    replace(`${pathname}?${params.toString()}`);
-  }
+    replace(`${pathname}?${params.toString()}`); // /dashboard/invoices/?query=whatever+is+typed+here
+  }, 300)
 
   return (
     <div className="relative flex flex-1 flex-shrink-0">
